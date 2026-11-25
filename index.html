@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+
+{% block title %}Menu | Smart Campus Canteen{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- Hero Banner -->
+    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-orange-600 via-amber-600 to-amber-500 text-white p-6 sm:p-10 mb-8 shadow-xl">
+        <div class="relative z-10 max-w-2xl">
+            <span class="inline-flex items-center gap-1.5 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold tracking-wide uppercase mb-3">
+                <i class="fa-solid fa-graduation-cap"></i> College Break Special
+            </span>
+            <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight leading-tight">
+                Skip the Canteen Queue, <br class="hidden sm:block"/>Grab Your Token Online!
+            </h1>
+            <p class="mt-3 text-orange-100 text-sm sm:text-base leading-relaxed">
+                Order before your lecture ends, pay securely with your student smart wallet, and collect fresh food without standing in 20-minute lines.
+            </p>
+            <div class="mt-6 flex flex-wrap gap-4 items-center">
+                <a href="#menu-section" class="bg-white text-orange-600 hover:bg-orange-50 px-6 py-2.5 rounded-xl font-bold text-sm shadow-md transition-all hover:-translate-y-0.5">
+                    Explore Today's Menu
+                </a>
+                <a href="{{ url_for('token_board') }}" target="_blank" class="bg-black/25 hover:bg-black/40 backdrop-blur-sm border border-white/20 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                    View Live Token Board
+                </a>
+            </div>
+        </div>
+        <!-- Decorative subtle icon -->
+        <i class="fa-solid fa-burger absolute -right-10 -bottom-10 text-[220px] text-white/10 rotate-12 pointer-events-none"></i>
+    </div>
+
+    <!-- Filter & Search Controls -->
+    <div id="menu-section" class="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm mb-8 space-y-4">
+        <form method="GET" action="{{ url_for('index') }}" class="grid grid-cols-1 md:grid-cols-12 gap-3">
+            <!-- Search bar -->
+            <div class="md:col-span-5 relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-sm"></i>
+                <input type="text" name="search" value="{{ search }}" placeholder="Search samosa, dosa, burger, coffee..." class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+            </div>
+
+            <!-- Diet selector -->
+            <div class="md:col-span-4 flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs font-semibold">
+                <a href="{{ url_for('index', category=selected_cat, diet='all', search=search) }}" 
+                   class="flex-1 text-center py-2 rounded-lg transition-all {% if diet == 'all' %} bg-white text-slate-900 shadow-sm {% else %} text-slate-600 hover:text-slate-900 {% endif %}">
+                    All Food
+                </a>
+                <a href="{{ url_for('index', category=selected_cat, diet='veg', search=search) }}" 
+                   class="flex-1 text-center py-2 rounded-lg transition-all flex items-center justify-center gap-1.5 {% if diet == 'veg' %} bg-white text-emerald-700 shadow-sm {% else %} text-slate-600 hover:text-emerald-700 {% endif %}">
+                    <span class="w-2 h-2 rounded-full bg-emerald-600"></span> Pure Veg
+                </a>
+                <a href="{{ url_for('index', category=selected_cat, diet='nonveg', search=search) }}" 
+                   class="flex-1 text-center py-2 rounded-lg transition-all flex items-center justify-center gap-1.5 {% if diet == 'nonveg' %} bg-white text-rose-700 shadow-sm {% else %} text-slate-600 hover:text-rose-700 {% endif %}">
+                    <span class="w-2 h-2 rounded-full bg-rose-600"></span> Non-Veg
+                </a>
+            </div>
+
+            <!-- Submit Filter -->
+            <div class="md:col-span-3 flex gap-2">
+                <input type="hidden" name="category" value="{{ selected_cat }}">
+                <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs py-2.5 rounded-xl transition-all shadow-sm">
+                    Filter Menu
+                </button>
+                {% if search or diet != 'all' or selected_cat != 'All' %}
+                <a href="{{ url_for('index') }}" class="px-3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-semibold flex items-center" title="Reset Filters">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </a>
+                {% endif %}
+            </div>
+        </form>
+
+        <!-- Category Pills -->
+        <div class="flex items-center gap-2 overflow-x-auto pb-2 pt-1 border-t border-slate-100 scrollbar-none">
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap mr-2">Categories:</span>
+            <a href="{{ url_for('index', category='All', diet=diet, search=search) }}"
+               class="px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all {% if selected_cat == 'All' %} bg-orange-600 text-white shadow-md shadow-orange-600/20 {% else %} bg-slate-100 text-slate-700 hover:bg-slate-200 {% endif %}">
+               🍽️ All Items
+            </a>
+            {% for cat in categories %}
+            <a href="{{ url_for('index', category=cat, diet=diet, search=search) }}"
+               class="px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all {% if selected_cat == cat %} bg-orange-600 text-white shadow-md shadow-orange-600/20 {% else %} bg-slate-100 text-slate-700 hover:bg-slate-200 {% endif %}">
+               {{ cat }}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Menu Items Grid -->
+    <div class="mb-6 flex items-center justify-between">
+        <h2 class="text-xl font-extrabold text-slate-900 flex items-center gap-2">
+            <span>{{ selected_cat }} Delicacies</span>
+            <span class="text-xs font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded-lg border border-orange-200">
+                {{ items|length }} Items
+            </span>
+        </h2>
+    </div>
+
+    {% if items %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {% for item in items %}
+        <div class="group bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col {% if not item.is_available %}opacity-70 grayscale-[30%]{% endif %}">
+            <!-- Image with Veg badge and Prep time -->
+            <div class="relative h-44 overflow-hidden bg-slate-100">
+                <img src="{{ item.image_url }}" alt="{{ item.name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy">
+                
+                <!-- Diet Badge -->
+                <div class="absolute top-3 left-3 bg-white/95 backdrop-blur-sm p-1 rounded-md shadow-sm border border-slate-200 flex items-center justify-center">
+                    <span class="w-3.5 h-3.5 border-2 {% if item.is_veg %}border-emerald-600{% else %}border-rose-600{% endif %} flex items-center justify-center p-[2px]">
+                        <span class="w-full h-full rounded-full {% if item.is_veg %}bg-emerald-600{% else %}bg-rose-600{% endif %}"></span>
+                    </span>
+                </div>
+
+                <!-- Prep Time Pill -->
+                <div class="absolute top-3 right-3 bg-slate-900/80 backdrop-blur-sm text-white text-[11px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm">
+                    <i class="fa-solid fa-clock text-amber-400"></i>
+                    <span>{{ item.prep_time }}m</span>
+                </div>
+
+                <!-- Category Tag -->
+                <div class="absolute bottom-2 left-3 bg-slate-900/70 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-0.5 rounded">
+                    {{ item.category }}
+                </div>
+
+                {% if not item.is_available %}
+                <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-[1px] flex items-center justify-center">
+                    <span class="bg-rose-600 text-white font-extrabold text-xs px-3 py-1.5 rounded-full uppercase tracking-wider shadow-lg">
+                        Out of Stock
+                    </span>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Card Body -->
+            <div class="p-4 flex flex-col flex-grow">
+                <h3 class="font-bold text-slate-900 text-base leading-snug group-hover:text-orange-600 transition-colors">
+                    {{ item.name }}
+                </h3>
+                <p class="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">
+                    {{ item.description }}
+                </p>
+
+                <div class="mt-auto pt-4 flex items-center justify-between border-t border-slate-100">
+                    <div>
+                        <span class="text-xs text-slate-400 block font-medium">Price</span>
+                        <span class="text-lg font-extrabold text-slate-900">₹{{ "%.0f"|format(item.price) }}</span>
+                    </div>
+
+                    {% if item.is_available %}
+                    <form action="{{ url_for('add_to_cart', item_id=item.id) }}" method="POST">
+                        <button type="submit" class="bg-orange-50 hover:bg-orange-600 text-orange-600 hover:text-white border border-orange-200 hover:border-transparent px-3.5 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all active:scale-95 shadow-sm">
+                            <i class="fa-solid fa-plus text-[11px]"></i> Add
+                        </button>
+                    </form>
+                    {% else %}
+                    <button disabled class="bg-slate-100 text-slate-400 px-3 py-1.5 rounded-xl text-xs font-semibold cursor-not-allowed">
+                        Unavailable
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="bg-white rounded-2xl border border-slate-200 p-12 text-center max-w-md mx-auto">
+        <div class="w-16 h-16 rounded-full bg-orange-50 text-orange-500 flex items-center justify-center mx-auto text-2xl mb-3">
+            <i class="fa-solid fa-bowl-food"></i>
+        </div>
+        <h3 class="font-bold text-slate-800 text-base">No food items found</h3>
+        <p class="text-xs text-slate-500 mt-1">Try resetting the search or selecting another category.</p>
+        <a href="{{ url_for('index') }}" class="inline-block mt-4 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold px-4 py-2 rounded-xl">
+            View Full Menu
+        </a>
+    </div>
+    {% endif %}
+
+    <!-- Quick Features Section for Viva / College presentation -->
+    <div class="mt-16 bg-white rounded-3xl border border-slate-200 p-6 sm:p-10 shadow-sm">
+        <div class="text-center max-w-xl mx-auto mb-8">
+            <span class="text-xs font-extrabold tracking-wider text-orange-600 uppercase">Campus Innovation</span>
+            <h2 class="text-2xl font-black text-slate-900 mt-1">Why Smart Canteen?</h2>
+            <p class="text-xs text-slate-500 mt-1">Built specifically to solve 30-minute recess canteen crowding and order mismanagement.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="p-5 rounded-2xl bg-orange-50/50 border border-orange-100 flex items-start gap-4">
+                <div class="w-10 h-10 rounded-xl bg-orange-600 text-white flex items-center justify-center shrink-0 font-bold shadow-md shadow-orange-600/30">
+                    <i class="fa-solid fa-ticket"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-slate-900 text-sm">Automated Token Dispenser</h3>
+                    <p class="text-xs text-slate-600 mt-1">Instant digital token generated with status tracking from kitchen to pickup counter.</p>
+                </div>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-emerald-50/50 border border-emerald-100 flex items-start gap-4">
+                <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 font-bold shadow-md shadow-emerald-600/30">
+                    <i class="fa-solid fa-id-card-clip"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-slate-900 text-sm">Student ID Smart Wallet</h3>
+                    <p class="text-xs text-slate-600 mt-1">Deduct food payments directly from student balance with 1-click contactless checkout.</p>
+                </div>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-sky-50/50 border border-sky-100 flex items-start gap-4">
+                <div class="w-10 h-10 rounded-xl bg-sky-600 text-white flex items-center justify-center shrink-0 font-bold shadow-md shadow-sky-600/30">
+                    <i class="fa-solid fa-tv"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-slate-900 text-sm">Live Kitchen TV Display</h3>
+                    <p class="text-xs text-slate-600 mt-1">Dedicated screen for canteen screens showing "Now Preparing" & "Ready for Pickup".</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}My Orders & Tokens | Smart Canteen{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-2xl font-black text-slate-900 flex items-center gap-2">
+                <i class="fa-solid fa-receipt text-orange-600"></i>
+                <span>My Order History</span>
+            </h1>
+            <p class="text-xs text-slate-500 mt-1">Track your active canteen tokens and past meals.</p>
+        </div>
+        <a href="{{ url_for('index') }}" class="bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs px-4 py-2 rounded-xl shadow-md shadow-orange-600/20">
+            <i class="fa-solid fa-plus mr-1"></i> New Order
+        </a>
+    </div>
+
+    {% if detailed_orders %}
+    <div class="space-y-4">
+        {% for entry in detailed_orders %}
+        {% set o = entry.order %}
+        <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm hover:shadow-md transition-shadow">
+            <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-3">
+                    <span class="font-mono font-black text-lg bg-orange-100 text-orange-700 px-3 py-1 rounded-xl border border-orange-200">
+                        {{ o.token_no }}
+                    </span>
+                    <div>
+                        <div class="text-xs text-slate-400 font-medium">{{ o.created_at }}</div>
+                        <div class="text-xs font-bold text-slate-700">Payment: {{ o.payment_method }}</div>
+                    </div>
+                </div>
+
+                <!-- Status Badge -->
+                <div>
+                    <span class="text-xs font-extrabold px-3 py-1.5 rounded-full uppercase tracking-wider
+                        {% if o.status == 'Received' %} bg-sky-100 text-sky-800 border border-sky-200
+                        {% elif o.status == 'Preparing' %} bg-amber-100 text-amber-800 border border-amber-200 animate-pulse
+                        {% elif o.status == 'Ready' %} bg-emerald-100 text-emerald-800 border border-emerald-300 font-black
+                        {% elif o.status == 'Completed' %} bg-slate-100 text-slate-600 border border-slate-200
+                        {% else %} bg-rose-100 text-rose-800 {% endif %}">
+                        {{ o.status }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Items summary -->
+            <div class="py-3 flex flex-wrap gap-2">
+                {% for item in entry.order_items %}
+                <span class="bg-slate-50 border border-slate-200 text-slate-700 px-2.5 py-1 rounded-lg text-xs font-semibold">
+                    {{ item.quantity }}x {{ item.item_name }} (₹{{ "%.0f"|format(item.price) }})
+                </span>
+                {% endfor %}
+            </div>
+
+            <!-- Total and details link -->
+            <div class="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
+                <span class="font-semibold text-slate-500">Total Paid: <span class="font-black text-slate-900 text-sm">₹{{ "%.2f"|format(o.total_amount) }}</span></span>
+                <a href="{{ url_for('order_success', order_id=o.id) }}" class="text-orange-600 hover:text-orange-700 font-bold flex items-center gap-1">
+                    View Live Token <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="bg-white rounded-3xl border border-slate-200 p-12 text-center max-w-md mx-auto shadow-sm">
+        <div class="w-16 h-16 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-2xl mb-3">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+        </div>
+        <h3 class="font-bold text-slate-800 text-base">No orders yet</h3>
+        <p class="text-xs text-slate-500 mt-1">Place your first order to get your digital canteen token!</p>
+        <a href="{{ url_for('index') }}" class="inline-block mt-4 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold px-5 py-2.5 rounded-xl">
+            Check Canteen Menu
+        </a>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Register Student Account | Smart Canteen{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto px-4 py-12">
+
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-xl p-6 sm:p-8">
+        <div class="text-center mb-6">
+            <div class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto text-2xl mb-3 shadow-inner">
+                <i class="fa-solid fa-user-plus"></i>
+            </div>
+            <h1 class="text-2xl font-black text-slate-900">New Student Registration</h1>
+            <p class="text-xs text-slate-500 mt-1">Join the smart food ordering system on campus</p>
+        </div>
+
+        <!-- Bonus Banner -->
+        <div class="bg-emerald-50 border border-emerald-200 p-3.5 rounded-2xl mb-6 text-xs text-emerald-800 flex items-center gap-3">
+            <div class="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-sm shrink-0">
+                ₹
+            </div>
+            <div>
+                <span class="font-extrabold block">Welcome Bonus Included!</span>
+                <span class="text-[11px] text-emerald-700">₹250 free starter balance credited directly to your Smart Wallet.</span>
+            </div>
+        </div>
+
+        <form action="{{ url_for('register') }}" method="POST" class="space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Full Name</label>
+                <input type="text" name="name" required placeholder="e.g. Priya Sharma" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">College Roll Number / Student ID</label>
+                <input type="text" name="roll_no" required placeholder="e.g. CS202615" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium uppercase">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Department / Branch</label>
+                <select name="department" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium bg-white">
+                    <option value="Computer Science & Engineering">Computer Science & Engineering</option>
+                    <option value="Information Technology">Information Technology</option>
+                    <option value="Electronics & Communication">Electronics & Communication</option>
+                    <option value="Mechanical Engineering">Mechanical Engineering</option>
+                    <option value="Civil Engineering">Civil Engineering</option>
+                    <option value="Management / MBA">Management / MBA</option>
+                    <option value="Science & Humanities">Science & Humanities</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Create Password</label>
+                <input type="password" name="password" required placeholder="••••••••" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium">
+            </div>
+
+            <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm py-3 rounded-xl shadow-lg shadow-emerald-600/30 transition-all hover:-translate-y-0.5 active:scale-95">
+                Register & Claim ₹250 Wallet Balance
+            </button>
+        </form>
+
+        <div class="mt-6 pt-4 border-t border-slate-100 text-center text-xs text-slate-500">
+            Already registered? 
+            <a href="{{ url_for('login') }}" class="font-bold text-emerald-600 hover:underline">Log In</a>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

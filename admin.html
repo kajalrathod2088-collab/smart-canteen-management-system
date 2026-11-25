@@ -1,0 +1,312 @@
+{% extends "base.html" %}
+
+{% block title %}Kitchen Desk & Admin | Smart Canteen{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+    <!-- Top Admin Bar -->
+    <div class="flex flex-wrap items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-2">
+                <span class="bg-rose-100 text-rose-800 text-xs font-black uppercase px-2.5 py-0.5 rounded-full border border-rose-200">
+                    Staff Portal
+                </span>
+                <span class="text-xs text-slate-400 font-mono">Logged in as {{ current_user.name }}</span>
+            </div>
+            <h1 class="text-3xl font-black text-slate-900 mt-1">Kitchen Order & Menu Manager</h1>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="{{ url_for('token_board') }}" target="_blank" class="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-4 py-2.5 rounded-xl flex items-center gap-2 shadow-sm">
+                <i class="fa-solid fa-tv text-amber-400"></i> Open Live TV Board
+            </a>
+            <button onclick="document.getElementById('addDishModal').classList.remove('hidden')" class="bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl flex items-center gap-2 shadow-md shadow-orange-600/20">
+                <i class="fa-solid fa-plus"></i> Add New Dish
+            </button>
+        </div>
+    </div>
+
+    <!-- KPI Metric Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <!-- Revenue -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex items-center justify-between">
+            <div>
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Total Canteen Revenue</span>
+                <span class="text-2xl sm:text-3xl font-black text-slate-900 mt-1 block">₹{{ "%.2f"|format(total_revenue) }}</span>
+                <span class="text-[11px] font-semibold text-emerald-600 mt-1 block">
+                    <i class="fa-solid fa-arrow-trend-up mr-0.5"></i> Wallet & Counter receipts
+                </span>
+            </div>
+            <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl font-bold">
+                ₹
+            </div>
+        </div>
+
+        <!-- Total Orders -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex items-center justify-between">
+            <div>
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Total Tokens Generated</span>
+                <span class="text-2xl sm:text-3xl font-black text-slate-900 mt-1 block">{{ total_orders }}</span>
+                <span class="text-[11px] font-semibold text-slate-500 mt-1 block">
+                    Lifetime student orders
+                </span>
+            </div>
+            <div class="w-12 h-12 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center text-xl">
+                <i class="fa-solid fa-receipt"></i>
+            </div>
+        </div>
+
+        <!-- Kitchen Active Queue -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex items-center justify-between">
+            <div>
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Active in Kitchen</span>
+                <span class="text-2xl sm:text-3xl font-black text-amber-600 mt-1 block">{{ active_orders }}</span>
+                <span class="text-[11px] font-semibold text-amber-700 mt-1 block">
+                    Received / Cooking / Ready
+                </span>
+            </div>
+            <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
+                <i class="fa-solid fa-fire-burner"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Orders Table Section -->
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+            <div>
+                <h2 class="text-lg font-black text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-bell text-orange-600"></i>
+                    <span>Live Kitchen Order Queue</span>
+                </h2>
+                <p class="text-xs text-slate-500">Update order status to alert students and update the TV display.</p>
+            </div>
+            <button onclick="window.location.reload()" class="text-xs font-bold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-xl transition-all">
+                <i class="fa-solid fa-rotate mr-1"></i> Refresh Queue
+            </button>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider">
+                    <tr>
+                        <th class="py-3 px-4">Token #</th>
+                        <th class="py-3 px-4">Student</th>
+                        <th class="py-3 px-4">Dishes Ordered</th>
+                        <th class="py-3 px-4">Bill</th>
+                        <th class="py-3 px-4">Status</th>
+                        <th class="py-3 px-4 text-right">Quick Action</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for item in orders %}
+                    {% set o = item.order %}
+                    <tr class="hover:bg-slate-50/70 transition-colors">
+                        <td class="py-3.5 px-4 font-mono font-black text-slate-900 text-sm">
+                            {{ o.token_no }}
+                        </td>
+                        <td class="py-3.5 px-4">
+                            <div class="font-bold text-slate-800">{{ o.student_name }}</div>
+                            <div class="text-[10px] text-slate-400 font-mono">{{ o.student_roll }}</div>
+                        </td>
+                        <td class="py-3.5 px-4">
+                            <div class="space-y-1">
+                                {% for di in item.order_items %}
+                                <span class="inline-block bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-semibold text-[11px] mr-1">
+                                    {{ di.quantity }}x {{ di.item_name }}
+                                </span>
+                                {% endfor %}
+                            </div>
+                        </td>
+                        <td class="py-3.5 px-4">
+                            <span class="font-bold text-slate-900">₹{{ "%.2f"|format(o.total_amount) }}</span>
+                            <span class="block text-[10px] text-slate-400">{{ o.payment_method }}</span>
+                        </td>
+                        <td class="py-3.5 px-4">
+                            <span class="font-bold px-2.5 py-1 rounded-full text-[10px] uppercase tracking-wider
+                                {% if o.status == 'Received' %} bg-sky-100 text-sky-800
+                                {% elif o.status == 'Preparing' %} bg-amber-100 text-amber-800 animate-pulse
+                                {% elif o.status == 'Ready' %} bg-emerald-100 text-emerald-800 font-black
+                                {% elif o.status == 'Completed' %} bg-slate-100 text-slate-600
+                                {% else %} bg-rose-100 text-rose-800 {% endif %}">
+                                {{ o.status }}
+                            </span>
+                        </td>
+                        <td class="py-3.5 px-4 text-right">
+                            <form action="{{ url_for('update_order_status') }}" method="POST" class="inline-flex items-center gap-1">
+                                <input type="hidden" name="order_id" value="{{ o.id }}">
+                                
+                                {% if o.status == 'Received' %}
+                                <button type="submit" name="status" value="Preparing" class="bg-amber-500 hover:bg-amber-600 text-white font-bold px-2.5 py-1 rounded-lg text-[11px] shadow-sm">
+                                    Start Cooking
+                                </button>
+                                {% elif o.status == 'Preparing' %}
+                                <button type="submit" name="status" value="Ready" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-2.5 py-1 rounded-lg text-[11px] shadow-sm animate-pulse">
+                                    Mark Ready
+                                </button>
+                                {% elif o.status == 'Ready' %}
+                                <button type="submit" name="status" value="Completed" class="bg-slate-800 hover:bg-slate-900 text-white font-bold px-2.5 py-1 rounded-lg text-[11px]">
+                                    Hand Over
+                                </button>
+                                {% endif %}
+
+                                {% if o.status not in ['Completed', 'Cancelled'] %}
+                                <button type="submit" name="status" value="Cancelled" class="text-rose-600 hover:bg-rose-50 p-1.5 rounded-lg text-xs" title="Cancel Order">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                                {% endif %}
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-8 text-slate-400">
+                            No orders placed in canteen yet today.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Menu Items Management Section -->
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+            <div>
+                <h2 class="text-lg font-black text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-utensils text-orange-600"></i>
+                    <span>Canteen Menu & Inventory Control</span>
+                </h2>
+                <p class="text-xs text-slate-500">Toggle stock availability when items run out during peak hours.</p>
+            </div>
+            <button onclick="document.getElementById('addDishModal').classList.remove('hidden')" class="bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs px-3 py-1.5 rounded-xl">
+                + Add Dish
+            </button>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider">
+                    <tr>
+                        <th class="py-3 px-4">Dish</th>
+                        <th class="py-3 px-4">Category</th>
+                        <th class="py-3 px-4">Price</th>
+                        <th class="py-3 px-4">Type</th>
+                        <th class="py-3 px-4">Stock Status</th>
+                        <th class="py-3 px-4 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for m in menu_items %}
+                    <tr class="hover:bg-slate-50/70 transition-colors">
+                        <td class="py-3 px-4 flex items-center gap-3">
+                            <img src="{{ m.image_url }}" alt="{{ m.name }}" class="w-10 h-10 rounded-lg object-cover bg-slate-100">
+                            <div>
+                                <span class="font-bold text-slate-900 block">{{ m.name }}</span>
+                                <span class="text-[10px] text-slate-400">~{{ m.prep_time }} mins prep</span>
+                            </div>
+                        </td>
+                        <td class="py-3 px-4 font-semibold text-slate-600">{{ m.category }}</td>
+                        <td class="py-3 px-4 font-bold text-slate-900">₹{{ "%.0f"|format(m.price) }}</td>
+                        <td class="py-3 px-4">
+                            {% if m.is_veg %}
+                            <span class="text-emerald-700 font-bold text-[11px]"><i class="fa-solid fa-leaf mr-1"></i>Veg</span>
+                            {% else %}
+                            <span class="text-rose-700 font-bold text-[11px]"><i class="fa-solid fa-drumstick-bite mr-1"></i>Non-Veg</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3 px-4">
+                            {% if m.is_available %}
+                            <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full">In Stock</span>
+                            {% else %}
+                            <span class="bg-rose-100 text-rose-800 text-[10px] font-bold px-2 py-0.5 rounded-full">Out of Stock</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3 px-4 text-right space-x-2">
+                            <a href="{{ url_for('toggle_stock', item_id=m.id) }}" class="text-xs font-bold px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-slate-100 text-slate-700">
+                                {% if m.is_available %}Mark Out of Stock{% else %}Mark Available{% endif %}
+                            </a>
+                            <a href="{{ url_for('delete_menu_item', item_id=m.id) }}" onclick="return confirm('Remove {{ m.name }} from menu?')" class="text-rose-500 hover:text-rose-700 p-1 text-xs">
+                                <i class="fa-solid fa-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<!-- Modal: Add New Menu Item -->
+<div id="addDishModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+            <h3 class="font-extrabold text-slate-900 text-base">Add New Dish to Canteen</h3>
+            <button onclick="document.getElementById('addDishModal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <form action="{{ url_for('add_menu_item') }}" method="POST" class="mt-4 space-y-3 text-xs">
+            <div>
+                <label class="block font-bold text-slate-700 mb-1">Item Name</label>
+                <input type="text" name="name" required placeholder="e.g. Paneer Butter Pav" class="w-full px-3 py-2 rounded-xl border border-slate-200">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Category</label>
+                    <select name="category" class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white">
+                        <option value="Breakfast">Breakfast</option>
+                        <option value="Snacks">Snacks</option>
+                        <option value="Meals">Meals</option>
+                        <option value="Fast Food">Fast Food</option>
+                        <option value="Beverages">Beverages</option>
+                        <option value="Desserts">Desserts</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Price (₹)</label>
+                    <input type="number" name="price" step="1" required placeholder="40" class="w-full px-3 py-2 rounded-xl border border-slate-200">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Food Type</label>
+                    <select name="is_veg" class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white">
+                        <option value="1">🟢 Pure Veg</option>
+                        <option value="0">🔴 Non-Veg</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Prep Time (mins)</label>
+                    <input type="number" name="prep_time" value="5" min="1" class="w-full px-3 py-2 rounded-xl border border-slate-200">
+                </div>
+            </div>
+
+            <div>
+                <label class="block font-bold text-slate-700 mb-1">Description</label>
+                <textarea name="description" rows="2" placeholder="Ingredients, taste, serving size..." class="w-full px-3 py-2 rounded-xl border border-slate-200"></textarea>
+            </div>
+
+            <div>
+                <label class="block font-bold text-slate-700 mb-1">Image URL (Optional)</label>
+                <input type="url" name="image_url" placeholder="https://images.unsplash.com/..." class="w-full px-3 py-2 rounded-xl border border-slate-200">
+            </div>
+
+            <div class="flex gap-2 pt-3">
+                <button type="button" onclick="document.getElementById('addDishModal').classList.add('hidden')" class="w-1/2 py-2 rounded-xl border border-slate-200 font-bold text-slate-600 hover:bg-slate-50">
+                    Cancel
+                </button>
+                <button type="submit" class="w-1/2 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-bold shadow-md shadow-orange-600/20">
+                    Add to Menu
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
